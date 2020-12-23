@@ -1,0 +1,40 @@
+(require 2htdp/universe)
+(require 2htdp/image)
+
+(define WIDTH 300)
+(define HEIGHT 400)
+(define CLOSE (/ HEIGHT 3))
+(define SCENE (empty-scene WIDTH HEIGHT "black"))
+(define UFO (overlay (circle 10 "solid" "green") (rectangle 30 10 "solid" "green")))
+(define UFO-CENTER (- HEIGHT (/ (image-height UFO) 2)))
+
+
+
+(define (next y)
+  (cond
+    [(<= y UFO-CENTER)
+     (+ y 3)]
+    [(> y UFO-CENTER)
+     (+ y 0)]))
+
+(define (TEXT y)
+  (cond
+    [(<= 0 y CLOSE) (text "DESCENDING" 10 "green")]
+    [(< CLOSE y UFO-CENTER) (text "CLOSING IN" 10 "yellow")]
+    [else (text "LANDED" 10 "red")]))
+(check-expect (TEXT UFO-CENTER) (text "LANDED" 10 "red"))
+
+(define (render y)
+  (place-image
+   UFO
+   (/ WIDTH 2) y
+   (place-image
+    (TEXT y)
+    100 20
+    SCENE)))
+
+
+(define (main y0)
+  (big-bang y0
+    [on-tick next]
+    [to-draw render]))
