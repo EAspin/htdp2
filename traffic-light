@@ -1,0 +1,62 @@
+(require 2htdp/image)
+(require 2htdp/universe)
+
+(define LIGHTRAD 40)
+(define BACKGROUND
+  (rectangle 360 90 "solid" "white"))
+(define GREEN
+  (place-image
+   (circle LIGHTRAD "solid" "green")
+   60 45
+   (place-image
+    (circle LIGHTRAD "solid" "grey")
+    180 45
+    (place-image
+     (circle LIGHTRAD "solid" "grey")
+     300 45
+     BACKGROUND))))
+(define YELLOW
+  (place-image
+   (circle LIGHTRAD "solid" "grey")
+   60 45
+   (place-image
+    (circle LIGHTRAD "solid" "yellow")
+    180 45
+    (place-image
+     (circle LIGHTRAD "solid" "grey")
+     300 45
+     BACKGROUND))))
+(define RED
+  (place-image
+   (circle LIGHTRAD "solid" "grey")
+   60 45
+   (place-image
+    (circle LIGHTRAD "solid" "grey")
+    180 45
+    (place-image
+     (circle LIGHTRAD "solid" "red")
+     300 45
+     BACKGROUND))))
+  
+
+
+;trafficlight-> image
+;renders cs as image
+(define (tl-render cs)
+  (cond
+    [(= cs 0) GREEN]
+    [(= cs 1) YELLOW]
+    [(>= cs 2) RED]))
+
+;trafficlight->trafficlight
+;gets the next color
+(define (tl-next cs)
+  (modulo (+ cs 1) 3))
+
+
+;trafficlight->trafficlight
+;time based traffic light
+(define (main initial-state)
+  (big-bang initial-state
+    [to-draw tl-render]
+    [on-tick tl-next 4]))
