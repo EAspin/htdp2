@@ -1,0 +1,21 @@
+(define-struct word [x y z])
+;a word is a structure
+; (make-word 1string 1string 1string)
+
+(define w1 (make-word "c" "a" "t"))
+(define w2 (make-word "d" "o" "g"))
+(define w3 (make-word "c" "a" "r"))
+
+;word word-> string
+;takes two words, reprints the letter if in
+;same place as both words, else #f
+;(check-expect (lettermatch w1 w3) (make-word "c" "a" #f))
+;(check-expect (lettermatch w2 w3) (make-word #f #f #f))
+
+
+
+(define (lettermatch a b)
+   (make-word
+   (if (string=? (word-x a) (word-x b)) (word-x a) false)   
+   (if (string=? (word-y a) (word-y b)) (word-y a) false)
+   (if (string=? (word-z a) (word-z b)) (word-z a) false)))
