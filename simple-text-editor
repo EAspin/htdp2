@@ -1,0 +1,62 @@
+(require 2htdp/universe)
+(define SCENE (empty-scene 200 20))
+(define CURSOR (rectangle 1 20 "solid" "red"))
+(define-struct editor [pre post])
+;an editor is a structure
+; (make-editor str str)
+;(make-editor s t) an editor whose visible text is
+;(string-append s t) with the curser displayed b/t s t
+
+(define edit1 (make-editor "" "ellie"))
+(define edit2 (make-editor "hey" "you"))
+(define edit3 (make-editor "asp" "inall"))
+
+;editor->image
+(define (render it) 
+   (overlay/align "left" "center"
+    (beside 
+                  (text (editor-pre it) 16 "black")
+                  CURSOR
+                  (text (editor-post it) 16 "black"))
+    SCENE))
+
+;str-> str
+(define (string-remove-last s)
+  (substring s 0 (- (string-length s) 1)))
+
+(define (string-first s)
+  (substring s 0 1))
+
+(define (string-rest s)
+  (substring s 1 (string-length s)))
+
+(define (string-last s)
+  (substring s (- (string-length s) 1)))
+
+  
+;ed ke->ed
+(define (edit it ke)
+   (cond 
+    [(key=? ke "left")
+     (make-editor
+      (string-remove-last (editor-pre it))
+      (string-append (string-last (editor-pre it)) (editor-post it)))]                     
+    [(key=? "right" ke)
+     (make-editor
+      (string-append (editor-pre it) (string-first (editor-post it)))
+      (string-rest (editor-post it)))]
+    [(key=? "\b" ke)
+     (make-editor
+      (string-remove-last (editor-pre it))
+      (editor-post it))]
+     [else
+      (make-editor
+       (string-append (editor-pre it) ke)
+       (editor-post it))]))
+   
+   
+;launches
+(define (main el)
+  (big-bang el
+      [to-draw render]
+      [on-key edit]))
