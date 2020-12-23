@@ -1,0 +1,66 @@
+(require 2htdp/universe)
+(require 2htdp/batch-io)
+
+(define WIDTH-OF-WORLD 200)
+(define WHEEL-RADIUS 5)
+(define WHEEL-DISTANCE (* WHEEL-RADIUS 5))
+(define SCENE (empty-scene 300 40 "sky blue"))
+
+
+(define TREE
+  (underlay/xy (circle 10 "solid" "green")
+               9 15
+               (rectangle 2 20 "solid" "brown")))
+
+(define BACKGROUND
+  (place-image TREE 20 20 SCENE)) 
+  
+
+
+(define WHEEL
+  (circle WHEEL-RADIUS "solid" "black"))
+(define SPACE
+  (rectangle (* WHEEL-RADIUS 2) WHEEL-RADIUS "solid" "sky blue"))
+(define BOTH-WHEELS
+  (beside WHEEL SPACE WHEEL))
+(define CARBODY
+  (above
+   (rectangle WHEEL-DISTANCE (* WHEEL-RADIUS 1.5) "solid" "silver")
+   (rectangle (* WHEEL-DISTANCE 2) (* WHEEL-RADIUS 2) "solid" "silver")))
+(define CAR
+  (overlay/align/offset "middle" "bottom"
+                        BOTH-WHEELS
+                        0 (* WHEEL-RADIUS -1)
+                        CARBODY))
+(define Y-CAR (- 40 (/ (image-height CAR) 2)))
+ 
+;world-state->image
+;places CAR x pixels froml in BACKGROUND
+(define (render x)
+  (place-image CAR x Y-CAR BACKGROUND))
+               
+;world-state->world-state
+;adds 3 to x to move CAR right
+(check-expect (tock 20) 23)
+(check-expect (tock 78) 81)
+(define (tock ws)
+  (+ 3 ws))
+
+;world-state number number string-> world-state
+;places car at x-mouse
+(define (hyper x-pos-car x-mouse y-mouse me)
+  (cond
+    [(string=? "button-down" me) x-mouse]
+    [else x-pos-car]))
+(check-expect (hyper 21 10 20 "enter") 21)
+(check-expect (hyper 42 10 20 "button-down") 10)
+(check-expect (hyper 42 10 20 "move") 42)
+
+;world-state->world-state
+;launches
+(define (main ws)
+  (big-bang ws
+    [on-tick tock]
+    [to-draw render]
+    [on-mouse hyper]
+    [stop-when zero?]))
