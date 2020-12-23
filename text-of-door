@@ -1,0 +1,49 @@
+;a DoorState is one of
+;-locked
+;-closed
+;-open
+(require 2htdp/universe)
+(define LOCKED "locked")
+(define CLOSED "closed")
+(define OPEN "open")
+
+;ds->ds
+;closes the door on tick of clock
+(check-expect (door-closer LOCKED) LOCKED)
+(check-expect (door-closer CLOSED) CLOSED)
+(check-expect (door-closer OPEN) CLOSED)
+(define (door-closer ds)
+  (cond
+    [(string=? LOCKED ds) LOCKED]
+    [(string=? CLOSED ds) CLOSED]
+    [(string=? OPEN ds) CLOSED]))
+
+;ds ke-> ds
+;acts on door in repsonse to key 
+(check-expect (door-action LOCKED "u") CLOSED)
+(check-expect (door-action CLOSED "l") LOCKED)
+(check-expect (door-action CLOSED " ") OPEN)
+(check-expect (door-action OPEN "a") OPEN)
+(define (door-action s k)
+  (cond
+    [(and (string=? LOCKED s) (string=? "u" k))
+     CLOSED]
+    [(and (string=? CLOSED s) (string=? "l" k))
+     LOCKED]
+    [(and (string=? CLOSED s) (string=? " " k))
+     OPEN]
+    [else s]))
+
+;ds->image
+;renders image
+(define (door-render s)
+  (place-image (text s 40 "red") 100 50
+               (empty-scene 200 100)))
+
+;ds->ds
+;launches
+(define (main initial)
+  (big-bang initial
+    [on-tick door-closer 3]
+    [on-key door-action]
+    [to-draw door-render]))
