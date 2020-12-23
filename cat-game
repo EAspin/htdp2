@@ -1,0 +1,59 @@
+(define catpic .)
+(require 2htdp/universe)
+(define BACKDROP (rectangle 500 500 "solid" "white"))
+(define RIGHTEDGE (round (- (image-width BACKDROP) (/ (image-width catpic) 2))))
+(define LEFTEDGE (round (/ (image-width catpic) 2)))
+(define fullhappy 200)
+(define (ENDCAT p)
+  (<= (cat-happy p) 0))
+
+(define-struct cat [xco happy direction])
+(define catexample1 (make-cat 250 fullhappy #true))
+(define catexample2 (make-cat 250 fullhappy #false))
+
+
+(define (render p)
+  (overlay/align "left" "top"
+                 (place-image/align (rectangle (cat-happy p) 20 "solid" "pink")
+                                    0 0 "left" "top" (rectangle 200 20 "solid" "black"))
+                 (place-image catpic (cat-xco p) 250
+                 BACKDROP)))
+
+(define (move3 p)
+  (cond
+    [(cat-direction p) (- (cat-xco p) 3)]
+    [(not (cat-direction p)) (+ (cat-xco p) 3)]))
+
+(define (minus1 p)
+   (- (cat-happy p) 1))
+
+(define (change-direction p)
+  (cond
+   [(>= (cat-xco p) RIGHTEDGE) #true]
+   [(<= (cat-xco p) LEFTEDGE) #false]
+   [else (cat-direction p)]))
+
+   
+(define (move p)
+   (make-cat
+    (move3 p)
+    (minus1 p)
+    (change-direction p)))
+
+(define (key p ke)
+  (make-cat
+   (cat-xco p)
+   (cond
+    [(and (< (cat-happy p) fullhappy) (key=? ke "up")) (+ (cat-happy p) 30)]
+    [(and (< (cat-happy p) fullhappy) (key=? ke "down")) (+ (cat-happy p) 50)]
+    [else (cat-happy p)])
+   (cat-direction p)))
+
+(define (main p)
+  (big-bang p
+    [to-draw render]
+    [on-tick move]
+    [on-key key]
+    [stop-when ENDCAT]))
+
+(main catexample1)
