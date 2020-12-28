@@ -1,0 +1,18 @@
+(define-struct spider [legs space])
+(define-struct elephant [space])
+(define-struct snake [length girth])
+(define-struct cat [whiskers lives space])
+
+;a is an animal struct, c is sq footage of transport space of cage
+;fits? determines if animal will fit in given c cage
+(define (fits? a c)
+  (cond
+    [(spider? a) (<= (spider-space a) c)]
+    [(elephant? a) (<= (elephant-space a) c)]
+    [(snake? a) (<= (* (snake-length a)(snake-girth a)) c)]
+    [(cat? a) (<= (cat-space a) c)]))
+
+(fits? (make-spider 3 10) 7)
+(fits? (make-elephant 200) 300)
+(fits? (make-snake 50 10) 501)
+(fits? (make-cat 40 9 20) 19)
