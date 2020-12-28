@@ -1,0 +1,135 @@
+(require 2htdp/universe)
+(define UFO1 (overlay (circle 10 "solid" "purple") (rectangle 30 10 "solid" "purple")))
+(define TANK1 (rectangle 20 50 "solid" "black"))
+(define TANK-HEIGHT 45)
+(define MISSILE1 (triangle 15 "solid" "red"))
+(define HEIGHT 300)
+(define GROUND 290)
+(define BACKGROUND (place-image/align (rectangle 300 10 "solid" "brown")
+                                      300 300 "right" "bottom"
+                                      (rectangle 300 300 "solid" "light blue")))
+
+
+
+(define-struct tank [loc vel])
+
+(define-struct aim [ufo tank])
+(define-struct fired [ufo tank missile])
+
+
+
+(define example2
+  (make-aim
+   (make-posn 150 0)
+   (make-tank (make-posn 150 (image-height BACKGROUND)) -3)))
+
+
+
+;drawing stuff
+(define (render s)
+  (cond
+    [(aim? s)
+     (tank-render (aim-tank s)
+                  (ufo-render (aim-ufo s) BACKGROUND))]
+    [(fired? s)
+     (tank-render (fired-tank s)
+                  (ufo-render (fired-ufo s)
+                              (missile-render (fired-missile s)
+                                              BACKGROUND)))]))
+
+(define (tank-render t im)
+  (place-image TANK1 (posn-x (tank-loc t)) (image-height BACKGROUND) im))
+(define (ufo-render u im)
+  (place-image UFO1 (posn-x u) (posn-y u) im))
+(define (missile-render m im)
+  (place-image MISSILE1 (posn-x m) (posn-y m) im))
+
+  
+
+;moving stuff
+(define (move s)
+  (cond
+    [(aim? s)
+     (make-aim
+      (ufo-move(aim-ufo s))
+      (tank-move (aim-tank s)))]
+    [(fired? s)
+     (make-fired
+      (ufo-move (fired-ufo s))
+      (tank-move (fired-tank s))
+      (missile-move (fired-missile s)))]))
+
+(define (tank-move t)
+ (make-tank
+  (make-posn (+ (posn-x (tank-loc t)) (tank-vel t)) (posn-y (tank-loc t)))
+  (tank-vel t)))
+   
+(define (ufo-move u)
+  (make-posn (rand u) (+ (posn-y u) 5)))
+
+(define (missile-move m)
+  (make-posn (posn-x m) (- (posn-y m) 3)))
+
+(define (rand n)
+  (random 301))
+
+;game over stuff 
+(define (ufo-landed u)
+ (cond
+  [(aim? u) (= (posn-y (aim-ufo u)) GROUND)]
+  [(fired? u) (= (posn-y (fired-ufo u)) GROUND)]))
+
+(define (ufo-hit u)
+  (cond
+    [(aim? u) u]
+    [(fired? u) (and (or (= (+ 5 (posn-x (fired-missile u))) (posn-x (fired-ufo u))) (= (- 5 (posn-x (fired-missile u))) (posn-x (fired-ufo u))))
+                     (or (= (+ 5 (posn-y (fired-missile u))) (posn-y (fired-ufo u))) (= (- 5 (posn-y (fired-missile u))) (posn-y (fired-ufo u)))))])) 
+
+(define (si-game-over? s)
+  (cond
+    [(aim? s) (ufo-landed s)]
+    [(fired? s) (or (ufo-landed s) (ufo-hit s))]))
+
+(define (si-final s)
+  (place-image/align (text "GAME OVER" 50 "red")
+   150 150 "center" "center" BACKGROUND))
+
+;controls
+(define (key s ke)
+ (cond
+   [(aim? s)
+    (cond
+      [(key=? ke "left") (make-aim
+                          (make-posn (posn-x (aim-ufo s)) (posn-y (aim-ufo s)))
+                          (make-tank (make-posn (posn-x (tank-loc (aim-tank s))) (posn-y (tank-loc (aim-tank s)))) -1))]
+      [(key=? ke "right") (make-aim
+                           (make-posn (posn-x (aim-ufo s)) (posn-y (aim-ufo s)))
+                           (make-tank (make-posn (posn-x (tank-loc (aim-tank s))) (posn-y (tank-loc (aim-tank s)))) 1))]
+      [(key=? ke " ") (make-fired
+                       (make-posn (posn-x (aim-ufo s)) (posn-y (aim-ufo s)))
+                       (make-tank (make-posn (posn-x (tank-loc (aim-tank s))) (posn-y (tank-loc (aim-tank s)))) (tank-vel (aim-tank s))) 
+                       (make-posn (posn-x (tank-loc (aim-tank s))) (posn-y (tank-loc (aim-tank s)))))])]
+   [(fired? s)
+    (cond
+      [(key=? ke "left") (make-fired
+                          (make-posn (posn-x (fired-ufo s)) (posn-y (fired-ufo s)))
+                          (make-tank (make-posn (posn-x (tank-loc (fired-tank s))) (posn-y (tank-loc (fired-tank s)))) -1)
+                          (make-posn (posn-x (fired-missile s)) (posn-y (fired-missile s))))]
+      [(key=? ke "right") (make-fired
+                          (make-posn (posn-x (fired-ufo s)) (posn-y (fired-ufo s)))
+                          (make-tank (make-posn (posn-x (tank-loc (fired-tank s))) (posn-y (tank-loc (fired-tank s)))) 1)
+                          (make-posn (posn-x (fired-missile s)) (posn-y (fired-missile s))))]
+      [(key=? ke " ") s])]))
+
+
+(define (game s)
+  (big-bang s
+    [to-draw render]
+    [on-tick move 0.1]
+    [stop-when si-game-over? si-final]
+    [on-key key]))
+
+
+(game example2)
+
+;;need to fix hit detection, and smaller random-xcos for ufo
