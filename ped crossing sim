@@ -1,0 +1,53 @@
+(define standing .)
+(define walking .)
+(define BACKGROUND (empty-scene 200 200 "black"))
+(require 2htdp/universe)
+(define-struct default [im])
+(define-struct moving [im hold])
+(define-struct count [num color])
+
+(define (render x)
+  (cond
+   [(default? x) (place-image/align standing 100 100 "center" "center" BACKGROUND)]
+   [(moving? x) (place-image/align walking 100 100 "center" "center" BACKGROUND)]
+   [(count? x) (place-image/align (text (number->string (count-num x)) 32 (color-num x))
+                                  100 100 "center" "center" BACKGROUND)]))
+
+(define (color-num x)
+  (if (= 0 (modulo (count-num x) 2)) "green" "orange"))
+
+(define (key x ke)
+  (cond
+   [(and (key=? " " ke ) (default? x)) (make-moving x 0)]
+   [(moving? x) x]
+   [(count? x) x]))
+
+(define (tock x)
+  (cond
+    [(default? x) x]
+    [(moving? x) (if (< (moving-hold x) 5)
+                     (make-moving
+                      (moving-im x)
+                      (+ 1 (moving-hold x)))
+                     (make-count 10 "green"))]
+    [(count? x) (if (> (count-num x) 0)
+                     (make-count
+                      (- (count-num x) 1)
+                       (count-color x))
+                     (make-default x))]))
+
+;space bar moves from don't walk to walk, 5 secs of walk, then countdown.
+(define (main x)
+  (big-bang x
+    [to-draw render]
+    [on-key key]
+    [on-tick tock 1]))
+
+(define example1
+  (make-default 1))
+(define example2
+  (make-moving 1 1))
+(define example3
+  (make-count 10 "green"))
+
+(main example1)
