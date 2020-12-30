@@ -1,0 +1,31 @@
+(require 2htdp/universe)
+
+(define AA "start")
+(define BB "expect")
+(define DD "end")
+(define ER "error")
+
+(define-struct ws [str])
+
+(define (key s ke)
+  (cond
+    [(and (key=? "a" ke) (string=? "start" (ws-str s))) (make-ws BB)]
+    [(and (or (key=? "b" ke) (key=? "c" ke)) (string=? "expect" (ws-str s))) (make-ws BB)]
+    [(and (key=? "d" ke) (string=? "expect" (ws-str s))) (make-ws DD)]
+    [else (make-ws ER)]))
+   
+
+(define (render s)
+  (cond
+    [(string=? "start" (ws-str s)) (rectangle 100 100 "solid" "white")]
+    [(string=? "expect" (ws-str s)) (rectangle 100 100 "solid" "yellow")]
+    [(string=? "end" (ws-str s)) (rectangle  100 100 "solid" "green")]
+    [(string=? "error" (ws-str s)) (rectangle 100 100 "solid" "red")]))
+
+(define (main s)
+  (big-bang s
+    [to-draw render]
+    [on-key key]))
+
+(define example1 (make-ws AA))
+(main example1)
