@@ -1,0 +1,7 @@
+(define (sum lst)
+  (cond
+    [(empty? lst) 0]
+    [else (+ (first lst) (sum (rest lst)))]))
+
+(define l (cons 25 (cons 25 (cons 25 (cons 25 '())))))
+(check-expect (sum l) 100)
