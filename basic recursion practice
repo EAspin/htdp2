@@ -17,3 +17,27 @@
 (check-expect (sum mt) 0)
 (check-expect (sum l) 100)
 (check-expect (sum neg) (error "list contains an invalid number"))
+
+(define (all-true lst)
+  (cond
+    [(empty? lst) #true]
+    [else (and
+      (first lst) (all-true (rest lst)))]))
+
+(define trues (cons #true (cons #true (cons #true '()))))
+(define mt '())
+(define one (cons #false (cons #true (cons #false '()))))
+(define falses (cons #f (cons #f (cons #f '()))))
+(define two (cons #true (cons #false (cons #true (cons #false '())))))
+
+(define (one-true lst)
+  (cond
+    [(empty? lst) #false]
+    [else
+     (or (first lst) (one-true (rest lst)))]))
+
+(one-true trues)
+(one-true mt)
+(one-true one)
+(one-true two)
+(one-true falses)
