@@ -1,7 +1,19 @@
 (define (sum lst)
   (cond
     [(empty? lst) 0]
-    [else (+ (first lst) (sum (rest lst)))]))
+    [(pos? lst) (+ (first lst) (sum (rest lst)))]
+    [else (error "list contains an invalid number")]))
+
+(define (pos? lst)
+  (cond
+    [(empty? lst) #true]
+    [else
+     (and (positive? (first lst)) (pos? (rest lst)))]))
 
 (define l (cons 25 (cons 25 (cons 25 (cons 25 '())))))
+(define neg (cons 25 (cons -25 (cons 25 '()))))
+(define one (cons 25 '()))
+(define mt '())
+(check-expect (sum mt) 0)
 (check-expect (sum l) 100)
+(check-expect (sum neg) (error "list contains an invalid number"))
