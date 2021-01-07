@@ -1,0 +1,31 @@
+(define test (cons 1 (cons 2 '())))
+(define test2 (cons 3 (cons 2 '())))
+(define (sum x)
+   (cond
+     [(empty? (rest x)) (first x)]
+     [else (+ (first x) (sum (rest x)))]))
+(define (how-many x)
+  (length x))
+(define (average x)
+  (/ (sum x)
+     (how-many x)))
+(define (sorted>? x)
+  (if (empty? (rest x))
+      (first x)
+      (> (first x) (sorted>? (rest x)))))
+(define (add n x)
+  (cond
+    [(zero? x) n]
+    [else (add1 (add n (sub1 x)))]))
+(define (multiply x y)
+  (cond
+    [(or (zero? x) (zero? y)) 0]
+    [else  (+ x (multiply x (sub1 y)))]))
+
+(check-expect (add 4 3) 7)
+(check-expect (multiply 4 3) 12)
+(check-expect (sum test) 3)
+(check-expect (how-many test) 2)
+(check-expect (average test) 1.5)
+(check-expect (sorted>? test) #false)
+(check-expect (sorted>? test2) #true)
