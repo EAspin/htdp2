@@ -1,0 +1,32 @@
+(define-struct layer [color doll])
+
+
+(define (depth an-rd)
+  (cond
+    [(string? an-rd) 1]
+    [else (+ (depth (layer-doll an-rd)) 1)]))
+
+(check-expect (depth "red") 1)
+(check-expect
+ (depth
+  (make-layer "yellow" (make-layer "green" "red"))) 3)
+
+(define (color-string an-rd)
+  (cond
+    [(string? an-rd) an-rd]
+    [else (string-append (layer-color an-rd) ", " (color-string (layer-doll an-rd)))]))
+
+(check-expect (color-string "red") "red")
+(check-expect
+ (color-string
+  (make-layer "yellow" (make-layer "green" "red"))) "yellow, green, red")
+
+(define (inner an-rd)
+  (cond
+    [(string? an-rd) an-rd]
+    [(layer? an-rd) (inner (layer-doll an-rd))]))
+
+(check-expect (inner "red") "red")
+(check-expect
+ (inner
+  (make-layer "yellow" (make-layer "green" "red"))) "red")
