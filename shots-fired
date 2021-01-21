@@ -1,0 +1,56 @@
+(require 2htdp/universe)
+(define HEIGHT 300)
+(define WIDTH 220)
+(define XSHOTS (/ WIDTH 2))
+
+;graphics
+(define BACKGROUND (rectangle WIDTH HEIGHT "solid" "black"))
+(define SHOT (triangle 3 "solid" "red"))
+
+;A List-of-shots is
+; '()
+; (cons Shot List-of-shots
+;collection of shots fired
+
+;a shot is a num
+;represents the shot's y-co
+
+;a shotworld is a list-of-num
+;represents the y-co of a shot
+
+;sw -> im
+;adds image of shot for y at (MID, y) to background image
+(check-expect (to-image '()) BACKGROUND)
+(check-expect (to-image (cons 9 '())) (place-image SHOT XSHOTS 9 BACKGROUND))
+(check-expect (to-image (cons 9 (cons 3 '())))
+              (place-image SHOT XSHOTS 9 (place-image SHOT XSHOTS 3 BACKGROUND)))
+(define (to-image sw)
+  (cond
+    [(empty? sw) BACKGROUND]
+    [else (place-image SHOT XSHOTS (first sw) (to-image (rest sw)))]))
+
+;sw -> sw
+;moves shot up by one pixel on clock tick
+(check-expect (tock '()) '())
+(check-expect (tock (cons 9 '())) (cons 8 '()))
+(define (tock sw)
+  (cond
+    [(empty? sw) '()]
+    [(< (first sw) 0) '()]
+    [else (cons (sub1 (first sw)) (tock (rest sw)))]))
+
+;sw ke -> sw
+;adds a shot to the world on space bar
+(check-expect (key '() " ") (cons HEIGHT '()))
+(define (key sw ke)
+  (if (key=? ke " ") (cons HEIGHT sw) sw))
+
+;sw-> sw
+;launches program
+(define (main sw)
+  (big-bang sw
+    [on-tick tock]
+    [to-draw to-image]
+    [on-key key]))
+
+(main '())
