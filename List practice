@@ -1,0 +1,23 @@
+(define (count los s)
+  (cond
+    [(empty? los) 0]
+    [(not (equal? (first los) s)) (count (rest los) s)]
+    [(equal? (first los) s) (add1 (count (rest los) s))]))    
+
+(define stringlist (cons "Ellie" (cons "Emma" (cons "Ellie" (cons "Ellie" '())))))
+(define x "Ellie")
+
+(count stringlist x)
+
+
+(define (set+.L set x)
+   (cons x set))
+
+(define (set+.R set x)
+  (if (member? x set) set (cons x set)))
+
+
+(define L (cons 1 (cons 2 (cons 3 '()))))
+
+(set+.L L 1)
+(set+.R L 1)
