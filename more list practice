@@ -1,0 +1,34 @@
+(define (wage* whrs)
+  (cond
+    [(empty? whrs) '()]
+    [(>= (first whrs) 100) (error "cannot have worked 100 or more hours")] 
+    [else (cons (wage (first whrs)) (wage* (rest whrs)))]))
+
+(define (wage h)
+  (* 12 h))
+  
+  
+(define (FtoC lot)
+  (cond
+    [(empty? lot) '()]
+    [else (cons (toC (first lot)) (FtoC (rest lot)))]))
+
+(define (toC n)
+  (* 5/9 (- n 32))) 
+  
+  
+(define (DtoE lon)
+  (cond
+    [(empty? lon) '()]
+    [else (cons (toE (first lon)) (DtoE (rest lon)))]))
+
+(define (toE x)
+  (* x 0.83)) 
+  
+(define (sub-robot lot new old)
+  (cond
+    [(empty? lot) '()]
+    [(string=? (first lot) old) (cons new (sub-robot (rest lot) new old))]
+    [else (cons (first lot) (sub-robot (rest lot) new old))]))
+
+  
