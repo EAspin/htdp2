@@ -1,0 +1,37 @@
+;list -> num
+;takes a list of posns and adds all the x-cos
+(check-expect (sum (cons (make-posn 3 3) (cons (make-posn 2 9) (cons (make-posn 1 5) '())))) 6) 
+(define (sum lop)
+  (cond
+    [(empty? lop) 0]
+    [(cons? lop) (+ (posn-x (first lop)) (sum (rest lop)))]))
+
+
+
+;list -> list
+;takes a list of posns and adds 1 to each y value
+(check-expect (yplus1 (cons (make-posn 3 3) (cons (make-posn 2 9) (cons (make-posn 1 5) '())))) (cons (make-posn 3 4) (cons (make-posn 2 10) (cons (make-posn 1 6) '())))) 
+(define (yplus1 lop)
+  (cond
+    [(empty? lop) '()]
+    [(cons? lop) (cons (make-posn (posn-x (first lop)) (+ 1 (posn-y (first lop)))) (yplus1 (rest lop)))]))
+
+;list-> list
+;takes a list of posns and returns values only if x value is between 0 and 100 and y value is between 0 and 200
+(check-expect (legal (cons (make-posn 50 50) (cons (make-posn 101 6) (cons (make-posn 69 206) '())))) (cons (make-posn 50 50) '()))
+(define (legal lop)
+  (cond
+    [(empty? lop) '()]
+    [(or (> (posn-x (first lop)) 100) (> (posn-y (first lop)) 200)) (legal (rest lop))]
+    [(and (cons? lop) (< (posn-x (first lop)) 100) (< (posn-y (first lop)) 200)) (cons (first lop) (legal (rest lop)))]))
+
+
+(define-struct phone [area switch four])
+
+(check-expect (replace (cons (make-phone 713 555 6666) (cons (make-phone 407 555 9999) (cons (make-phone 713 444 2121) '()))))
+              (cons (make-phone 281 555 6666) (cons (make-phone 407 555 9999) (cons (make-phone 281 444 2121) '()))))
+(define (replace lon)
+  (cond
+    [(empty? lon) '()]
+    [(= 713 (phone-area (first lon))) (cons (make-phone 281 (phone-switch (first lon)) (phone-four (first lon))) (replace (rest lon)))]
+    [else (cons (make-phone (phone-area (first lon)) (phone-switch (first lon)) (phone-four (first lon))) (replace (rest lon)))]))
