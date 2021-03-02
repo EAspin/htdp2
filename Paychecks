@@ -1,0 +1,25 @@
+(define-struct work [employee enum rate hours])
+;a work is a structure
+;(make-work string num num)
+;combines name, employee number with pay rate and num of hours
+
+(define-struct paycheck [employee enum amount])
+;a paycheck is a structure
+;(make-paycheck string num)
+;provides employee name and number and total amount of weekly paycheck
+
+;computes weekly wages
+(check-expect (list-of-paychecks '()) '())
+(check-expect (list-of-paychecks (cons (make-work "Ellie" 001 10 10) '())) (cons (make-paycheck "Ellie" 001 100) '()))
+(check-expect (list-of-paychecks (cons (make-work "Ellie" 001 10 10) (cons (make-work "J" 002 15 10) '()))) (cons (make-paycheck "Ellie" 001 100) (cons (make-paycheck "J" 002 150) '())))
+
+
+(define (list-of-paychecks an-low)
+  (cond
+    [(empty? an-low) '()]
+    [(cons? an-low) (cons (make-paycheck (work-employee (first an-low)) (work-enum (first an-low)) (wages (first an-low)))
+                                    (list-of-paychecks (rest an-low)))]))
+
+
+(define (wages w)
+   (* (work-rate w) (work-hours w)))
